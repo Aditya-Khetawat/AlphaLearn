@@ -25,12 +25,12 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-# Set up CORS - More permissive for debugging
+# Set up CORS - Maximum permissive for debugging
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Temporarily allow all origins for debugging
-    allow_credentials=False,  # Must be False when using "*"
-    allow_methods=["*"],
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -105,6 +105,15 @@ def health_check():
         "status": "ok",
         "service": "alphalearn-backend",
         "version": "2.0.0"
+    }
+
+# CORS test endpoint
+@app.get("/cors-test")
+def cors_test():
+    return {
+        "message": "CORS is working!",
+        "timestamp": "2025-08-02",
+        "cors_enabled": True
     }
 
 if __name__ == "__main__":

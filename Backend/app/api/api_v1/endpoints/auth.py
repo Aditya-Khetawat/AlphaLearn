@@ -10,7 +10,7 @@ from app.core.config import settings
 from app.core.security import create_access_token
 from app.crud import user as user_crud
 from app.models.models import User, Portfolio
-from app.schemas.schemas import Token, UserCreate, User as UserSchema
+from app.schemas.schemas import Token, UserCreate, User as UserSchema, UserLogin
 
 router = APIRouter()
 
@@ -39,6 +39,37 @@ def login_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return {
+        "access_token": create_access_token(
+            subject=user.id, expires_delta=access_token_expires
+        ),
+        "token_type": "bearer",
+    }
+
+
+@router.post("/login-json", response_model=Token)
+def login_json(
+    *,
+    db: Session = Depends(get_db),
+    user_credentials: UserLogin
+) -> Any:
+    """
+    JSON-compatible login endpoint for frontend applications
+    """
+    user = user_crud.authenticate(
+        db=db, email=user_credentials.email, password=user_credentials.password
+    )
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+        )
+    elif not user_crud.is_active(user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Inactive user",
+        )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {
         "access_token": create_access_token(

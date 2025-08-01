@@ -52,16 +52,9 @@ async function fetchApi(endpoint: string, options: RequestInit = {}) {
 // Authentication Service
 export const authService = {
   login: async (email: string, password: string) => {
-    return fetchApi("/auth/login", {
+    return fetchApi("/auth/login-json", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        username: email, // FastAPI OAuth expects 'username'
-        password,
-        grant_type: "password",
-      }),
+      body: JSON.stringify({ email, password }),
     });
   },
 

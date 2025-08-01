@@ -17,7 +17,9 @@ class Settings(BaseSettings):
         "http://localhost:3002", 
         "http://localhost:3003", 
         "http://localhost", 
-        "https://alphalearn.vercel.app"
+        "https://alphalearn.vercel.app",
+        "https://*.railway.app",
+        "https://*.vercel.app"
     ]
     
     # Security
@@ -30,7 +32,7 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "postgres")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "alphalearn")
     POSTGRES_PORT: str = os.getenv("POSTGRES_PORT", "5432")
-    SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
+    SQLALCHEMY_DATABASE_URI: Optional[str] = None
 
     # Redis
     REDIS_HOST: str = os.getenv("REDIS_HOST", "localhost")
@@ -50,16 +52,25 @@ class Settings(BaseSettings):
     # User settings
     INITIAL_BALANCE: float = 100000.0  # ₹1,00,000 starting balance
     
-    @field_validator("SQLALCHEMY_DATABASE_URI", mode="after")
-    def assemble_db_connection(cls, v: Optional[str], info) -> Any:
-        if isinstance(v, str):
+    @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
+    def assemble_db_connection(cls, v: Optional[str]) -> Any:
+        # First check if DATABASE_URL is provided (Railway/Heroku style)
+        database_url = os.getenv("DATABASE_URL")
+        if database_url:
+            return database_url
+            
+        # If direct URI is provided, use it
+        if isinstance(v, str) and v:
             return v
             
-        values = info.data
+        # Fallback to building from components (local development)
+        postgres_server = os.getenv("POSTGRES_SERVER", "localhost")
+        postgres_user = os.getenv("POSTGRES_USER", "postgres")
+        postgres_password = os.getenv("POSTGRES_PASSWORD", "postgres")
+        postgres_db = os.getenv("POSTGRES_DB", "alphalearn")
+        postgres_port = os.getenv("POSTGRES_PORT", "5432")
         
-        # For PostgreSQL, build a proper connection string
-        postgres_url = f"postgresql://{values.get('POSTGRES_USER')}:{values.get('POSTGRES_PASSWORD')}@{values.get('POSTGRES_SERVER')}:{values.get('POSTGRES_PORT')}/{values.get('POSTGRES_DB')}"
-        return postgres_url
+        return f"postgresql://{postgres_user}:{postgres_password}@{postgres_server}:{postgres_port}/{postgres_db}"
 
     class Config:
         env_file = ".env"

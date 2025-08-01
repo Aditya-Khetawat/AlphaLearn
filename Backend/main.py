@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import logging
+import os
 
 from app.core.config import settings
 from app.api.api_v1.api import api_router
@@ -37,11 +38,19 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     """
-    Enhanced FastAPI startup event - automatically populate comprehensive stock database
-    Using multiple data sources: NSE API + Yahoo Finance + comprehensive stock lists
+    Railway-optimized startup event - lightweight initialization
     """
     logger.info("🌟 AlphaLearn FastAPI server starting up...")
-    logger.info("🚀 Initializing ENHANCED comprehensive Indian stock database...")
+    
+    # Check if we're in Railway environment
+    is_railway = os.getenv("RAILWAY_ENVIRONMENT_NAME") is not None
+    
+    if is_railway:
+        logger.info("🚂 Railway deployment detected - using lightweight startup")
+        logger.info("✅ Server ready for health checks")
+        return
+    
+    logger.info("🚀 Initializing comprehensive Indian stock database...")
     logger.info("📊 Data sources: NSE API, Yahoo Finance, curated stock lists")
     
     # Use comprehensive stock population service to get ALL Indian stocks
@@ -87,6 +96,15 @@ def root():
         "status": "healthy",
         "version": "2.0.0",
         "docs_url": "/docs"
+    }
+
+# Dedicated health check endpoint for Railway
+@app.get("/health")
+def health_check():
+    return {
+        "status": "ok",
+        "service": "alphalearn-backend",
+        "version": "2.0.0"
     }
 
 if __name__ == "__main__":

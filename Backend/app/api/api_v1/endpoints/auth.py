@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -13,6 +13,11 @@ from app.models.models import User, Portfolio
 from app.schemas.schemas import Token, UserCreate, User as UserSchema
 
 router = APIRouter()
+
+# Add OPTIONS handler for CORS preflight
+@router.options("/login")
+def login_options():
+    return Response(status_code=200)
 
 
 @router.post("/login", response_model=Token)

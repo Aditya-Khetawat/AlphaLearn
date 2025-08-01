@@ -112,8 +112,9 @@ def health_check():
 def cors_test():
     return {
         "message": "CORS is working!",
-        "timestamp": "2025-08-02",
-        "cors_enabled": True
+        "timestamp": "2025-08-02T12:00:00Z",
+        "cors_enabled": True,
+        "deployment_version": "v2.1"
     }
 
 if __name__ == "__main__":

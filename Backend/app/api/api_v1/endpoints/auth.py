@@ -19,6 +19,10 @@ router = APIRouter()
 def login_options():
     return Response(status_code=200)
 
+@router.options("/register")
+def register_options():
+    return Response(status_code=200)
+
 
 @router.post("/login", response_model=Token)
 def login_access_token(

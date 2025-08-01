@@ -23,6 +23,7 @@ async function fetchApi(endpoint: string, options: RequestInit = {}) {
 
   const response = await fetch(fullUrl, {
     ...options,
+    credentials: "include", // Enable cookies/credentials
     headers: {
       ...defaultHeaders,
       ...options.headers,

@@ -1,0 +1,35 @@
+Dockerfile*
+.dockerignore
+.git
+.gitignore
+README.md
+.env
+.nyc_output
+.coverage
+.coverage.*
+.cache
+.pytest_cache
+test/
+tests/
+**/*.test.js
+**/*.spec.js
+.next
+.vercel
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts

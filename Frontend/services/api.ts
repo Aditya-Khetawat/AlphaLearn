@@ -2,9 +2,6 @@
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
 
-console.log("🔧 DEBUG - Current API_URL:", API_URL);
-console.log("🔧 DEBUG - Environment:", process.env.NODE_ENV);
-
 // For real implementation, you'd replace these with actual API calls
 // This is a simple structure for demonstration purposes
 

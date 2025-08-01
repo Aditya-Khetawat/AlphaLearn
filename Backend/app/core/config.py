@@ -18,9 +18,8 @@ class Settings(BaseSettings):
         "http://localhost:3003", 
         "http://localhost", 
         "https://alphalearn.vercel.app",
-        "https://alpha-learn-xxv4.vercel.app",  # Your actual Vercel deployment
-        "*"  # Allow all origins for development - restrict in production if needed
-        # Note: Railway and Vercel domains added dynamically in main.py
+        "https://alpha-learn-xxv4.vercel.app"  # Your actual Vercel deployment
+        # Note: Additional domains added dynamically in cors_origins_list
     ]
     
     @property

@@ -150,7 +150,12 @@ def cors_test():
         "cors_method": "specific_domain_only",
         "allowed_origins": ["http://localhost:3000", "https://alpha-learn-xxv4.vercel.app"],
         "new_endpoints": ["/auth/login-json", "/db-health"],
-        "database_url_configured": bool(settings.SQLALCHEMY_DATABASE_URI)
+        "database_url_configured": bool(settings.SQLALCHEMY_DATABASE_URI),
+        "env_vars_available": {
+            "DATABASE_URL": bool(os.getenv("DATABASE_URL")),
+            "POSTGRES_SERVER": bool(os.getenv("POSTGRES_SERVER")),
+            "RAILWAY_ENVIRONMENT": bool(os.getenv("RAILWAY_ENVIRONMENT_NAME"))
+        }
     }
 
 if __name__ == "__main__":

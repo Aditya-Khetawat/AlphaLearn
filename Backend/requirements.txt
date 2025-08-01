@@ -15,3 +15,5 @@ pytest>=7.4.0
 httpx>=0.24.1
 supabase>=0.7.1
 pytz>=2023.3
+pydantic-settings>=2.0.0
+

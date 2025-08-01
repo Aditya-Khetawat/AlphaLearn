@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebSocket Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .status {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .connected {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .disconnected {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+      .connecting {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+      pre {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AlphaLearn Leaderboard WebSocket Test</h1>
+
+    <div id="status" class="status disconnected">Disconnected</div>
+
+    <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()">Disconnect</button>
+    <button onclick="sendPing()">Send Ping</button>
+    <button onclick="requestRefresh()">Request Refresh</button>
+
+    <h3>Messages:</h3>
+    <div id="messages"></div>
+
+    <script>
+      let ws = null;
+
+      function updateStatus(status, className) {
+        const statusEl = document.getElementById("status");
+        statusEl.textContent = status;
+        statusEl.className = `status ${className}`;
+      }
+
+      function addMessage(message) {
+        const messagesEl = document.getElementById("messages");
+        const messageEl = document.createElement("pre");
+        messageEl.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        messagesEl.appendChild(messageEl);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      function connect() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          addMessage("Already connected");
+          return;
+        }
+
+        updateStatus("Connecting...", "connecting");
+        addMessage("Connecting to ws://localhost:8000/api/v1/ws/leaderboard");
+
+        ws = new WebSocket("ws://localhost:8000/api/v1/ws/leaderboard");
+
+        ws.onopen = function () {
+          updateStatus("Connected", "connected");
+          addMessage("WebSocket connected successfully");
+        };
+
+        ws.onmessage = function (event) {
+          addMessage(`Received: ${event.data}`);
+
+          try {
+            const data = JSON.parse(event.data);
+            if (data.leaderboard) {
+              addMessage(`Leaderboard has ${data.leaderboard.length} entries`);
+              if (data.leaderboard.length > 0) {
+                const top = data.leaderboard[0];
+                addMessage(
+                  `Top trader: ${top.username} (₹${top.portfolio_value})`
+                );
+              }
+            }
+          } catch (e) {
+            addMessage(`Message parsing failed: ${e.message}`);
+          }
+        };
+
+        ws.onclose = function (event) {
+          updateStatus("Disconnected", "disconnected");
+          addMessage(`WebSocket closed: ${event.code} - ${event.reason}`);
+        };
+
+        ws.onerror = function (error) {
+          updateStatus("Error", "disconnected");
+          addMessage(`WebSocket error: ${error}`);
+        };
+      }
+
+      function disconnect() {
+        if (ws) {
+          ws.close();
+          ws = null;
+        }
+      }
+
+      function sendPing() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send("ping");
+          addMessage("Sent: ping");
+        } else {
+          addMessage("Not connected");
+        }
+      }
+
+      function requestRefresh() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send("refresh");
+          addMessage("Sent: refresh");
+        } else {
+          addMessage("Not connected");
+        }
+      }
+
+      // Auto-connect on page load
+      connect();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Stock API Test</title>
+  </head>
+  <body>
+    <h1>Stock API Test</h1>
+    <input
+      type="text"
+      id="query"
+      placeholder="Enter stock query (e.g., RELIANCE)"
+      value="RELIANCE"
+    />
+    <button onclick="testAPI()">Test API</button>
+    <div id="result"></div>
+
+    <script>
+      async function testAPI() {
+        const query = document.getElementById("query").value;
+        const resultDiv = document.getElementById("result");
+
+        try {
+          console.log("Testing API call...");
+          const response = await fetch(
+            `http://localhost:8000/api/v1/stocks/search?query=${query}&limit=10`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          console.log("Response status:", response.status);
+          console.log("Response headers:", response.headers);
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log("API Response:", data);
+
+          resultDiv.innerHTML = `
+                    <h3>Success! Found ${data.length} stocks:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+        } catch (error) {
+          console.error("API Error:", error);
+          resultDiv.innerHTML = `
+                    <h3>Error:</h3>
+                    <p style="color: red;">${error.message}</p>
+                `;
+        }
+      }
+    </script>
+  </body>
+</html>

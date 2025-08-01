@@ -57,26 +57,36 @@ def login_json(
     """
     JSON-compatible login endpoint for frontend applications
     """
-    user = user_crud.authenticate(
-        db=db, email=user_credentials.email, password=user_credentials.password
-    )
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+    try:
+        user = user_crud.authenticate(
+            db=db, email=user_credentials.email, password=user_credentials.password
         )
-    elif not user_crud.is_active(user):
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect email or password",
+            )
+        elif not user_crud.is_active(user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Inactive user",
+            )
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        return {
+            "access_token": create_access_token(
+                subject=user.id, expires_delta=access_token_expires
+            ),
+            "token_type": "bearer",
+        }
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        # Handle database connection errors
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Inactive user",
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Database connection error: {str(e)[:100]}. Please check /db-health endpoint."
         )
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    return {
-        "access_token": create_access_token(
-            subject=user.id, expires_delta=access_token_expires
-        ),
-        "token_type": "bearer",
-    }
 
 
 @router.post("/register", response_model=UserSchema)

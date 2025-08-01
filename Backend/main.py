@@ -112,6 +112,33 @@ def health_check():
         "version": "2.0.0"
     }
 
+# Database health check endpoint
+@app.get("/db-health")
+def database_health_check():
+    try:
+        from app.api.deps import get_db
+        from app.models.models import User
+        
+        # Try to get a database session
+        db = next(get_db())
+        
+        # Try a simple query
+        count = db.query(User).count()
+        
+        return {
+            "status": "ok",
+            "database": "connected",
+            "user_count": count,
+            "database_url": settings.SQLALCHEMY_DATABASE_URI[:50] + "..." if settings.SQLALCHEMY_DATABASE_URI else "Not configured"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "database": "disconnected",
+            "error": str(e),
+            "database_url": settings.SQLALCHEMY_DATABASE_URI[:50] + "..." if settings.SQLALCHEMY_DATABASE_URI else "Not configured"
+        }
+
 # CORS test endpoint
 @app.get("/cors-test")
 def cors_test():
@@ -119,10 +146,11 @@ def cors_test():
         "message": "CORS is working!",
         "timestamp": "2025-08-02T12:00:00Z",
         "cors_enabled": True,
-        "deployment_version": "v2.6",
+        "deployment_version": "v2.7",
         "cors_method": "specific_domain_only",
         "allowed_origins": ["http://localhost:3000", "https://alpha-learn-xxv4.vercel.app"],
-        "new_endpoints": ["/auth/login-json"]
+        "new_endpoints": ["/auth/login-json", "/db-health"],
+        "database_url_configured": bool(settings.SQLALCHEMY_DATABASE_URI)
     }
 
 if __name__ == "__main__":

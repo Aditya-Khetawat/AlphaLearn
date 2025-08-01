@@ -26,35 +26,18 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-# Set up CORS - Specific origins with credentials
+# Set up CORS - Simple and effective
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,  # Use specific domains
-    allow_credentials=True,  # Enable credentials
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://alpha-learn-xxv4.vercel.app",
+        "https://vercel.app"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Add manual CORS headers to all responses
-@app.middleware("http")
-async def add_cors_headers(request, call_next):
-    # Handle preflight requests
-    if request.method == "OPTIONS":
-        response = Response()
-        response.headers["Access-Control-Allow-Origin"] = "https://alpha-learn-xxv4.vercel.app"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-        response.headers["Access-Control-Allow-Headers"] = "*"
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-        response.headers["Access-Control-Max-Age"] = "86400"
-        return response
-    
-    response = await call_next(request)
-    response.headers["Access-Control-Allow-Origin"] = "https://alpha-learn-xxv4.vercel.app"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    response.headers["Access-Control-Max-Age"] = "86400"
-    return response
 
 # Enhanced startup event with comprehensive stock population
 @app.on_event("startup")
@@ -136,8 +119,8 @@ def cors_test():
         "message": "CORS is working!",
         "timestamp": "2025-08-02T12:00:00Z",
         "cors_enabled": True,
-        "deployment_version": "v2.3",
-        "cors_method": "specific_domain_with_credentials",
+        "deployment_version": "v2.4",
+        "cors_method": "simplified_fastapi_middleware",
         "allowed_origin": "https://alpha-learn-xxv4.vercel.app"
     }
 

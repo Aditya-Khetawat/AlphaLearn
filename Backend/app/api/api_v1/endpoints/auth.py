@@ -14,15 +14,6 @@ from app.schemas.schemas import Token, UserCreate, User as UserSchema
 
 router = APIRouter()
 
-# Add OPTIONS handler for CORS preflight
-@router.options("/login")
-def login_options():
-    return Response(status_code=200)
-
-@router.options("/register")
-def register_options():
-    return Response(status_code=200)
-
 
 @router.post("/login", response_model=Token)
 def login_access_token(

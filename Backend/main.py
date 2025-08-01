@@ -139,6 +139,27 @@ def database_health_check():
             "database_url": settings.SQLALCHEMY_DATABASE_URI[:50] + "..." if settings.SQLALCHEMY_DATABASE_URI else "Not configured"
         }
 
+# Database initialization endpoint
+@app.post("/init-db")
+def initialize_database():
+    """Initialize database tables if they don't exist"""
+    try:
+        from app.core.database import Base, engine
+        
+        # Create all tables
+        Base.metadata.create_all(bind=engine)
+        
+        return {
+            "status": "success",
+            "message": "Database tables created successfully",
+            "timestamp": "2025-08-02T12:00:00Z"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Failed to create database tables: {str(e)}"
+        }
+
 # CORS test endpoint
 @app.get("/cors-test")
 def cors_test():
@@ -146,10 +167,10 @@ def cors_test():
         "message": "CORS is working!",
         "timestamp": "2025-08-02T12:00:00Z",
         "cors_enabled": True,
-        "deployment_version": "v2.7",
+        "deployment_version": "v2.8",
         "cors_method": "specific_domain_only",
         "allowed_origins": ["http://localhost:3000", "https://alpha-learn-xxv4.vercel.app"],
-        "new_endpoints": ["/auth/login-json", "/db-health"],
+        "new_endpoints": ["/auth/login-json", "/db-health", "/init-db"],
         "database_url_configured": bool(settings.SQLALCHEMY_DATABASE_URI),
         "env_vars_available": {
             "DATABASE_URL": bool(os.getenv("DATABASE_URL")),

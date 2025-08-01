@@ -26,16 +26,12 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-# Set up CORS - Comprehensive and permissive
+# Set up CORS - Specific to your deployment domains
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001", 
-        "https://alpha-learn-xxv4.vercel.app",
-        "https://*.vercel.app",
-        "https://vercel.app",
-        "*"  # Allow all origins temporarily for debugging
+        "http://localhost:3000",  # for local dev
+        "https://alpha-learn-xxv4.vercel.app"  # for production
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -123,9 +119,9 @@ def cors_test():
         "message": "CORS is working!",
         "timestamp": "2025-08-02T12:00:00Z",
         "cors_enabled": True,
-        "deployment_version": "v2.5",
-        "cors_method": "enhanced_permissive_cors",
-        "allowed_origin": "ALL_ORIGINS_TEMPORARILY",
+        "deployment_version": "v2.6",
+        "cors_method": "specific_domain_only",
+        "allowed_origins": ["http://localhost:3000", "https://alpha-learn-xxv4.vercel.app"],
         "new_endpoints": ["/auth/login-json"]
     }
 

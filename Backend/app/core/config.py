@@ -1,6 +1,6 @@
 import os
 from typing import Any, Dict, List, Optional, Union
-from pydantic import AnyHttpUrl, PostgresDsn, field_validator
+from pydantic import AnyHttpUrl, field_validator
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -10,17 +10,33 @@ class Settings(BaseSettings):
     # Server
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
     
-    # CORS Configuration
+    # CORS Configuration - Railway compatible
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000", 
         "http://localhost:3001", 
         "http://localhost:3002", 
         "http://localhost:3003", 
         "http://localhost", 
-        "https://alphalearn.vercel.app",
-        "https://*.railway.app",
-        "https://*.vercel.app"
+        "https://alphalearn.vercel.app"
+        # Note: Railway and Vercel domains added dynamically in main.py
     ]
+    
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """Get CORS origins including dynamic Railway/Vercel domains"""
+        origins = self.CORS_ORIGINS.copy()
+        
+        # Add Railway domain if available
+        railway_domain = os.getenv("RAILWAY_PUBLIC_DOMAIN")
+        if railway_domain:
+            origins.append(f"https://{railway_domain}")
+            
+        # Add Vercel domain if available
+        vercel_url = os.getenv("VERCEL_URL")
+        if vercel_url:
+            origins.append(f"https://{vercel_url}")
+            
+        return origins
     
     # Security
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-super-secret-key-here")

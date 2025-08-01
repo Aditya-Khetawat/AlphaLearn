@@ -7,6 +7,7 @@ This guide covers multiple deployment options for the AlphaLearn stock trading p
 ### 1. Vercel (Frontend) + Railway (Backend) - Recommended
 
 #### Frontend on Vercel:
+
 1. Go to [Vercel](https://vercel.com)
 2. Import your GitHub repository
 3. Set project root to `Frontend`
@@ -14,6 +15,7 @@ This guide covers multiple deployment options for the AlphaLearn stock trading p
 5. Deploy automatically
 
 #### Backend on Railway:
+
 1. Go to [Railway](https://railway.app)
 2. Create new project from GitHub
 3. Select your repository
@@ -24,10 +26,12 @@ This guide covers multiple deployment options for the AlphaLearn stock trading p
 ### 2. Docker Deployment
 
 #### Prerequisites:
+
 - Docker and Docker Compose installed
 - Environment files configured
 
 #### Steps:
+
 ```bash
 # Clone the repository
 git clone https://github.com/Aditya-Khetawat/AlphaLearn.git
@@ -47,6 +51,7 @@ Access the application at `http://localhost`
 ### 3. Heroku Deployment
 
 #### Backend:
+
 ```bash
 cd Backend
 heroku create alphalearn-backend
@@ -58,6 +63,7 @@ git push heroku main
 ```
 
 #### Frontend:
+
 ```bash
 cd Frontend
 heroku create alphalearn-frontend
@@ -68,6 +74,7 @@ git push heroku main
 ### 4. AWS/GCP/Azure Deployment
 
 Use the provided Dockerfiles to deploy on any cloud platform:
+
 - **AWS**: ECS, Elastic Beanstalk, or App Runner
 - **GCP**: Cloud Run, App Engine, or GKE
 - **Azure**: Container Instances, App Service, or AKS
@@ -75,6 +82,7 @@ Use the provided Dockerfiles to deploy on any cloud platform:
 ## Environment Variables Reference
 
 ### Backend (.env)
+
 ```env
 DATABASE_URL=postgresql://...
 SUPABASE_URL=https://...
@@ -84,6 +92,7 @@ CORS_ORIGINS=["http://localhost:3000"]
 ```
 
 ### Frontend (.env.local)
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
@@ -108,17 +117,20 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 4. **Environment Variables**: Ensure all required variables are set
 
 ### Health Checks:
+
 - Backend: `GET /health`
 - Frontend: Should load homepage successfully
 
 ## Performance Optimization
 
 ### Backend:
+
 - Use Redis for caching
 - Configure database connection pooling
 - Enable gzip compression
 
 ### Frontend:
+
 - Enable Next.js image optimization
 - Configure CDN for static assets
 - Use proper caching headers
@@ -134,6 +146,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 ## Monitoring
 
 ### Recommended Tools:
+
 - **Vercel**: Built-in analytics
 - **Railway**: Built-in monitoring
 - **Sentry**: Error tracking
@@ -143,6 +156,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 ## Support
 
 For deployment issues:
+
 1. Check logs for specific error messages
 2. Verify environment variables
 3. Test locally first

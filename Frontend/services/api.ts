@@ -51,7 +51,7 @@ async function fetchApi(endpoint: string, options: RequestInit = {}) {
 // Authentication Service
 export const authService = {
   login: async (email: string, password: string) => {
-    return fetchApi("/auth/token/", {
+    return fetchApi("/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -70,7 +70,7 @@ export const authService = {
     password: string,
     full_name?: string
   ) => {
-    return fetchApi("/auth/register/", {
+    return fetchApi("/auth/register", {
       method: "POST",
       body: JSON.stringify({ username, email, password, full_name }),
     });

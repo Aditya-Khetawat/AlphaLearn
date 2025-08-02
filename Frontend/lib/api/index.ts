@@ -99,17 +99,13 @@ export const authAPI = {
    * Login with email and password
    */
   login: async (email: string, password: string) => {
-    const formData = new URLSearchParams();
-    // FastAPI's OAuth2 endpoint expects username field (even if we use email)
-    formData.append("username", email);
-    formData.append("password", password);
-
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/auth/login-json`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: formData,
+      headers: defaultHeaders,
+      body: JSON.stringify({
+        email: email,
+        password: password,
+      }),
     });
 
     const data = await handleResponse(response);

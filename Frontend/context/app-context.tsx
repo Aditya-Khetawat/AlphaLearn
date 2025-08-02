@@ -417,7 +417,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
           refreshLeaderboard();
         } catch (error) {
           console.error("Error loading user data:", error);
+          // If token is invalid, clear it and redirect to login
           authAPI.logout();
+          setState((prevState) => ({
+            ...prevState,
+            user: null,
+          }));
+          // Only redirect if we're not already on login/register pages
+          if (
+            typeof window !== "undefined" &&
+            !window.location.pathname.includes("/login") &&
+            !window.location.pathname.includes("/register")
+          ) {
+            window.location.href = "/login";
+          }
         }
       } else {
         // Load real stock data even when not logged in

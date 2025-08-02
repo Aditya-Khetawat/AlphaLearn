@@ -34,15 +34,14 @@ export const AuthService = {
   // Login user and get tokens
   async login(credentials: LoginCredentials): Promise<AuthTokens> {
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`${API_URL}/auth/login-json`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/json",
         },
-        body: new URLSearchParams({
-          username: credentials.email, // FastAPI OAuth expects 'username'
+        body: JSON.stringify({
+          email: credentials.email,
           password: credentials.password,
-          grant_type: "password",
         }),
       });
 
@@ -113,28 +112,27 @@ export const AuthService = {
     }
   },
 
-  // Store token in cookies
+  // Store token in localStorage (consistent with API service)
   setToken(token: string): void {
     if (typeof window === "undefined") return;
 
-    // Set cookie with HTTP-only flag (should be done server-side for security)
+    localStorage.setItem("alphalearn_token", token);
+    // Also set cookie for backwards compatibility
     document.cookie = `alphalearn_token=${token}; path=/; max-age=86400; SameSite=Strict`;
   },
 
-  // Get token from cookies
+  // Get token from localStorage (consistent with API service)
   getToken(): string | null {
     if (typeof window === "undefined") return null;
 
-    const match = document.cookie.match(
-      new RegExp("(^| )alphalearn_token=([^;]+)")
-    );
-    return match ? match[2] : null;
+    return localStorage.getItem("alphalearn_token");
   },
 
-  // Remove token from cookies
+  // Remove token from both localStorage and cookies
   removeToken(): void {
     if (typeof window === "undefined") return;
 
+    localStorage.removeItem("alphalearn_token");
     document.cookie =
       "alphalearn_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
   },

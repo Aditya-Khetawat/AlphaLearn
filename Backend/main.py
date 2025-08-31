@@ -43,7 +43,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     """
-    Railway-optimized startup event - lightweight initialization
+    Railway-optimized startup event - lightweight initialization with price scheduler
     """
     logger.info("🌟 AlphaLearn FastAPI server starting up...")
     
@@ -52,6 +52,19 @@ async def startup_event():
     
     if is_railway:
         logger.info("🚂 Railway deployment detected - using lightweight startup")
+        
+        # Always start the price scheduler even in Railway environment
+        try:
+            market_status = market_timer.get_market_status_message()
+            logger.info(f"📊 Market Status: {market_status['message']}")
+            
+            price_scheduler.start_scheduler()
+            logger.info("🚀 Real-time price update scheduler started on Railway!")
+            logger.info("⏰ Updates every 20s during market hours, 5min when closed")
+        except Exception as scheduler_error:
+            logger.warning(f"⚠️  Could not start price scheduler: {scheduler_error}")
+            logger.info("💡 You can manually start it via /api/v1/stocks/start-real-time")
+        
         logger.info("✅ Server ready for health checks")
         return
     

@@ -189,6 +189,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
         error: { ...prevState.error, stocks: null },
       }));
 
+      // First trigger a price update in the background
+      try {
+        console.log("Triggering backend price update...");
+        await fetch(
+          `${
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"
+          }/stocks/update-prices?quick=true`,
+          {
+            method: "POST",
+          }
+        );
+        console.log("Price update triggered successfully");
+
+        // Wait a moment for the update to process
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      } catch (updateError) {
+        console.warn("Could not trigger price update:", updateError);
+        // Continue with stock fetch even if price update fails
+      }
+
       // Load popular stocks initially for the main page and better search fallback
       // Full market access is available through search functionality
       const apiStocks: ApiStock[] = await stockAPI.getStocks({ limit: 200 }); // Load top 200 popular stocks
@@ -448,10 +468,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     intervalRef.current = setInterval(() => {
       if (mountedRef.current) {
-        console.log("Periodic stock refresh (every 5 minutes)");
+        console.log("Periodic stock refresh (every 2 minutes)");
         refreshStocks();
       }
-    }, 300000); // 5 minutes instead of 2
+    }, 120000); // 2 minutes for more frequent updates
 
     return () => {
       mountedRef.current = false;

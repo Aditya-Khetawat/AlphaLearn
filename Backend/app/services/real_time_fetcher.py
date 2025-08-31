@@ -15,7 +15,6 @@ import requests
 
 from app.services.market_timing import market_timer
 from app.models.models import Stock
-from app.core.database import get_db_session
 
 logger = logging.getLogger(__name__)
 
@@ -332,24 +331,16 @@ class RealTimePriceFetcher:
                     stock.last_updated = current_time
                     updated_count += 1
             
-            # Commit changes (db session is managed by the caller)
+            # Commit changes
+            db.commit()
             logger.info(f"Successfully updated {updated_count} stock prices")
             
             return updated_count
         
         except Exception as e:
             logger.error(f"Error updating database prices: {e}")
-            raise  # Let the context manager handle rollback
-
-# Add standalone function for price updates with proper session management
-async def update_stock_prices_standalone(symbols: List[str] = None) -> int:
-    """Standalone function to update stock prices with proper session management"""
-    try:
-        with get_db_session() as db:
-            return await real_time_fetcher.update_database_prices(db, symbols)
-    except Exception as e:
-        logger.error(f"Error in standalone price update: {e}")
-        return 0
+            db.rollback()
+            return 0
 
 # Global instance
 real_time_fetcher = RealTimePriceFetcher()

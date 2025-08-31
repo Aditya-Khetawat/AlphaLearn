@@ -10,7 +10,7 @@ from contextlib import contextmanager
 
 from app.services.market_timing import market_timer
 from app.services.real_time_fetcher import real_time_fetcher
-from app.core.database import get_db_session
+from app.core.database import SessionLocal
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +31,16 @@ class PriceUpdateScheduler:
     
     @contextmanager
     def get_db_session(self):
-        """Get database session with proper cleanup - now using centralized context manager"""
-        with get_db_session() as db:
+        """Get database session with proper cleanup"""
+        db = SessionLocal()
+        try:
             yield db
+        except Exception as e:
+            logger.error(f"Database error: {e}")
+            db.rollback()
+            raise
+        finally:
+            db.close()
     
     async def _single_update_cycle(self):
         """Perform a single price update cycle"""

@@ -13,7 +13,7 @@ from app.models.models import User, Stock
 from app.schemas.schemas import Stock as StockSchema, StockCreate, StockUpdate
 from app.core.json_utils import safe_jsonable_encoder, SafeJSONResponse
 from app.services.real_time_prices import real_time_fetcher as old_fetcher
-from app.services.real_time_fetcher import real_time_fetcher, update_stock_prices_standalone
+from app.services.real_time_fetcher import real_time_fetcher
 from app.services.market_timing import market_timer
 from app.services.price_scheduler import price_scheduler
 from app.core.timezone_utils import format_ist_for_api
@@ -53,8 +53,7 @@ async def read_stocks(
                 
                 logger.info(f"📈 Refreshing prices for {len(symbols_to_update)} trending stocks on-demand")
                 
-                # Use the standalone function for better session management
-                updated_count = await update_stock_prices_standalone(symbols_to_update)
+                updated_count = await real_time_fetcher.update_database_prices(db, symbols_to_update)
                 logger.info(f"✅ Updated {updated_count} trending stock prices on-demand")
                 
                 # Refresh the stocks from database to get updated prices
@@ -194,7 +193,7 @@ async def search_stocks(
                 logger.info(f"🔍 User searched '{query}' - updating prices for {len(symbols_to_update)} results on-demand")
                 
                 # Update prices for these specific stocks
-                updated_count = await update_stock_prices_standalone(symbols_to_update)
+                updated_count = await real_time_fetcher.update_database_prices(db, symbols_to_update)
                 logger.info(f"✅ Updated {updated_count} stock prices on-demand for search results")
                 
                 # Refresh the stocks from database to get updated prices
@@ -480,7 +479,7 @@ async def read_stock(
                 logger.info(f"👁️ User viewing stock details for {stock.symbol} - updating price on-demand")
                 
                 # Update price for this specific stock
-                updated_count = await update_stock_prices_standalone([stock.symbol])
+                updated_count = await real_time_fetcher.update_database_prices(db, [stock.symbol])
                 logger.info(f"✅ Updated price for {stock.symbol} on-demand")
                 
                 # Refresh the stock from database to get updated price
@@ -631,6 +630,7 @@ def refresh_all_stocks(
 @router.post("/update-prices", response_model=Dict[str, Any])
 def update_stock_prices(
     *,
+    db: Session = Depends(get_db),
     background_tasks: BackgroundTasks,
     quick: bool = Query(False, description="Quick update for popular stocks only"),
 ) -> Any:
@@ -639,20 +639,17 @@ def update_stock_prices(
     """
     async def run_price_update():
         if quick:
-            # Quick update with popular stock symbols
-            popular_symbols = ["TCS", "RELIANCE", "HDFCBANK", "INFY", "ICICIBANK", 
-                             "HINDUNILVR", "ITC", "SBIN", "BHARTIARTL", "KOTAKBANK"]
-            updated = await update_stock_prices_standalone(popular_symbols)
+            updated = await real_time_fetcher.update_popular_stocks(50)
             return {"updated_count": updated, "type": "quick"}
         else:
-            # Extended update (no specific symbols = update active stocks)
-            updated = await update_stock_prices_standalone()
+            # For full update, we'd implement update_all_active_stocks method
+            updated = await real_time_fetcher.update_popular_stocks(200)  # Update more stocks
             return {"updated_count": updated, "type": "extended"}
     
     # Run the async function in background
     background_tasks.add_task(lambda: asyncio.run(run_price_update()))
     
-    update_type = "quick (popular stocks)" if quick else "extended (active stocks)"
+    update_type = "quick (50 popular stocks)" if quick else "extended (200 stocks)"
     return {
         "message": f"Price update started in background - {update_type}",
         "status": "processing"

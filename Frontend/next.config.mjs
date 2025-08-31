@@ -10,7 +10,9 @@ const nextConfig = {
     unoptimized: true,
   },
   output: "standalone",
-  outputFileTracingRoot: process.cwd(),
+  experimental: {
+    outputFileTracingRoot: process.cwd(),
+  },
 };
 
 export default nextConfig;

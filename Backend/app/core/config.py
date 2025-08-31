@@ -74,10 +74,19 @@ class Settings(BaseSettings):
         # First check if DATABASE_URL is provided (Railway/Heroku style)
         database_url = os.getenv("DATABASE_URL")
         if database_url:
+            # If it's a Supabase URL, add pgbouncer for connection pooling
+            if "supabase.co" in database_url and "pgbouncer=true" not in database_url:
+                # Add pgbouncer parameter for better connection pooling
+                separator = "&" if "?" in database_url else "?"
+                database_url = f"{database_url}{separator}pgbouncer=true"
             return database_url
             
         # If direct URI is provided, use it
         if isinstance(v, str) and v:
+            # If it's a Supabase URL, add pgbouncer for connection pooling
+            if "supabase.co" in v and "pgbouncer=true" not in v:
+                separator = "&" if "?" in v else "?"
+                v = f"{v}{separator}pgbouncer=true"
             return v
             
         # Fallback to building from components (local development)
